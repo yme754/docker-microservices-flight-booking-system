@@ -1,11 +1,16 @@
 package com.flightapp.kafka;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import com.flightapp.events.BookingCancelledEvent;
 import com.flightapp.events.BookingCreatedEvent;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class BookingEventProducer {
 	private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -16,9 +21,9 @@ public class BookingEventProducer {
         kafkaTemplate.send("booking-created", event.getBookingId(), event)
             .whenComplete((result, ex) -> {
                 if (ex == null) {
-                    System.out.println("Booking event published: " + event);
+                	log.info("Booking event published: {}", event);
                 } else {
-                    System.err.println("Failed to publish booking event: " + ex.getMessage());
+                	log.error("Failed to publish booking event: {}", ex.getMessage());
                 }
             });
     }
@@ -27,9 +32,9 @@ public class BookingEventProducer {
     	kafkaTemplate.send("booking-cancelled", event.getBookingId(), event)
         .whenComplete((result, ex) -> {
             if (ex == null) {
-                System.out.println("Cancellation event published: " + event.getPnr());
+            	log.info("Cancellation event published: {}", event.getPnr());
             } else {
-                System.err.println("Failed to publish cancellation: " + ex.getMessage());
+            	log.error("Failed to publish cancellation: {}", ex.getMessage());
             }
         });
     }

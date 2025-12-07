@@ -73,12 +73,11 @@ class BookingControllerTest {
     
     @Test
     void testBookFlight() {
-        when(bookingService.bookFlight(any(Booking.class)))
-                .thenReturn(Mono.just(sampleBooking));      
+        when(bookingService.bookFlight(any(Booking.class))).thenReturn(Mono.just(sampleBooking));
         webTestClient.post().uri("/api/flight/bookings/book")
             .bodyValue(sampleBooking)
             .exchange()
-            .expectStatus().isOk()
+            .expectStatus().isCreated() 
             .expectBody()
             .jsonPath("$.id").isEqualTo(sampleBooking.getId()); 
         verify(bookingService, times(1)).bookFlight(any(Booking.class));

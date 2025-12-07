@@ -3,6 +3,8 @@ package com.flightapp.controller;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,6 +27,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/flight/bookings")
 public class BookingController {
 	private final BookingService bookingService;
+	private static final Logger logger = LoggerFactory.getLogger(BookingController.class);
 
     public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;
@@ -37,9 +40,12 @@ public class BookingController {
     }
     
     @PostMapping("/book")
-    public Mono<Map<String, String>> bookFlight(@RequestBody BookingDTO bookingDTO) {
-        return bookingService.bookFlight(toEntity(bookingDTO))
-        		.map(booking -> Map.of("id", booking.getId(),  "pnr", booking.getPnr()));
+    public Mono<ResponseEntity<Map<String, String>>> bookFlight(@RequestBody BookingDTO bookingDTO) {
+    	logger.info("SonarCloud Analysis Triggered");
+    	return bookingService.bookFlight(toEntity(bookingDTO)).map(booking -> {
+                    Map<String, String> response = Map.of("id", booking.getId(),"pnr", booking.getPnr());
+                    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+                });
     }
 
     @GetMapping("/{pnr}")
