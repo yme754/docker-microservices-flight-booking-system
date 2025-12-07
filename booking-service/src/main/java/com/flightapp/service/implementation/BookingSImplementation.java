@@ -76,6 +76,10 @@ public class BookingSImplementation implements BookingService {
     	return bookingRepo.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Invalid booking ID")))
                 .flatMap(booking -> {
+                	long hoursSinceBooking = java.time.Duration.between(booking.getBookingDate(), java.time.LocalDateTime.now()).toHours();
+                    if (hoursSinceBooking > 24) {
+                        return Mono.error(new RuntimeException("can't cancel flight after 24 hrs from booking"));
+                    }
                     BookingCancelledEvent event = new BookingCancelledEvent();
                     event.setBookingId(booking.getId());
                     event.setEmail(booking.getEmail());
