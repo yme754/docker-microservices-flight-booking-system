@@ -1,5 +1,7 @@
 package com.flightapp.kafka;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,6 +37,16 @@ class BookingEventProducerTest {
         when(kafkaTemplate.send("booking-created", event.getBookingId(), event)).thenReturn(future);
         bookingEventProducer.sendBookingCreatedEvent(event);
         verify(kafkaTemplate, times(1)).send("booking-created", event.getBookingId(), event);
+    }
+    
+    @Test
+    void testSendBookingCreatedEvent_Failure() {
+        BookingCreatedEvent event = new BookingCreatedEvent("1", "mail@test.com", "PNR", 1);        
+        CompletableFuture<SendResult<String, BookingCreatedEvent>> failedFuture = new CompletableFuture<>();
+        failedFuture.completeExceptionally(new RuntimeException("Kafka is down"));
+        when(kafkaTemplate.send(anyString(), anyString(), any())).thenReturn(failedFuture);
+        bookingEventProducer.sendBookingCreatedEvent(event);
+        verify(kafkaTemplate, times(1)).send(anyString(), anyString(), any());
     }
 
 }

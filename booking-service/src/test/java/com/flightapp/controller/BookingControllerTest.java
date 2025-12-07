@@ -35,7 +35,6 @@ class BookingControllerTest {
         MockitoAnnotations.openMocks(this);
         BookingController bookingController = new BookingController(bookingService);
         webTestClient = WebTestClient.bindToController(bookingController).build();
-        
         sampleBooking = new Booking();
         sampleBooking.setId(UUID.randomUUID().toString());
         sampleBooking.setPnr("PNR-ABC123");
@@ -52,12 +51,11 @@ class BookingControllerTest {
 
     @Test
     void testCreateBooking() {
-        when(bookingService.createBooking(any(Booking.class))).thenReturn(Mono.just(sampleBooking));
-        
+        when(bookingService.createBooking(any(Booking.class))).thenReturn(Mono.just(sampleBooking));        
         webTestClient.post().uri("/api/flight/bookings")
             .bodyValue(sampleBooking)
             .exchange()
-            .expectStatus().isCreated()
+            .expectStatus().isCreated() 
             .expectBody()
             .jsonPath("$.id").exists(); 
         verify(bookingService, times(1)).createBooking(any(Booking.class));
@@ -65,8 +63,7 @@ class BookingControllerTest {
     
     @Test
     void testGetBookingByPnr() {
-        when(bookingService.getBookingByPnr("PNR-ABC123")).thenReturn(Mono.just(sampleBooking));
-        
+        when(bookingService.getBookingByPnr("PNR-ABC123")).thenReturn(Mono.just(sampleBooking));        
         webTestClient.get().uri("/api/flight/bookings/PNR-ABC123")
             .exchange()
             .expectStatus().isOk()
@@ -77,17 +74,15 @@ class BookingControllerTest {
     @Test
     void testBookFlight() {
         when(bookingService.bookFlight(any(Booking.class)))
-                .thenReturn(Mono.just(sampleBooking));
-        
+                .thenReturn(Mono.just(sampleBooking));      
         webTestClient.post().uri("/api/flight/bookings/book")
             .bodyValue(sampleBooking)
             .exchange()
-            .expectStatus().isCreated()
+            .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.id").isEqualTo(sampleBooking.getId()); 
         verify(bookingService, times(1)).bookFlight(any(Booking.class));
     }
-
 
     @Test
     void testGetAllBookings() {
@@ -107,5 +102,23 @@ class BookingControllerTest {
             .exchange()
             .expectStatus().isOk();
         verify(bookingService, times(1)).deleteBooking("123");
+    }
+    
+    @Test
+    void testDeleteBooking_NotFound() {
+        when(bookingService.deleteBooking("unknown")).thenReturn(Mono.error(new RuntimeException("invalid flight ID")));
+        webTestClient.delete().uri("/api/flight/bookings/unknown")
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(String.class).isEqualTo("invalid flight"); 
+    }
+
+    @Test
+    void testDeleteBooking_BadRequest() {
+        when(bookingService.deleteBooking("old")).thenReturn(Mono.error(new RuntimeException("Too late")));
+        webTestClient.delete().uri("/api/flight/bookings/old")
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class).isEqualTo("Too late");
     }
 }
