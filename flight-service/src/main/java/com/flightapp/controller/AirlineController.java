@@ -48,7 +48,7 @@ public class AirlineController {
             });
     }
 
-    @PutMapping("/{airlineId}/add-flight/{flightId}")
+    @PutMapping("/{airlineId}/add/{flightId}")
     public Mono<Airline> addFlightToAirline(
             @PathVariable String airlineId,
             @PathVariable String flightId) {
