@@ -1,5 +1,7 @@
 package com.flightapp.kafka;
 
+import static org.springframework.kafka.support.serializer.JsonSerializer.ADD_TYPE_INFO_HEADERS;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,17 +14,17 @@ import org.springframework.kafka.core.ProducerFactory;
 
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import com.flightapp.events.BookingCreatedEvent;
 
 @Configuration
 public class KafkaProducerConfig {
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "removal", "deprecation" })
 	@Bean
     public ProducerFactory<String, Object> producerFactory() {
         Map<String, Object> config = new HashMap<>();
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        config.put(ADD_TYPE_INFO_HEADERS, true);
         return new DefaultKafkaProducerFactory<>(config);
     }
 

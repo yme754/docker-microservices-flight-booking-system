@@ -74,10 +74,15 @@ public class BookingSImplementation implements BookingService {
     @Override
     public Mono<Void> deleteBooking(String id) {
     	return bookingRepo.findById(id)
-                .switchIfEmpty(Mono.error(new RuntimeException("Invalid flight ID"))) 
+                .switchIfEmpty(Mono.error(new RuntimeException("Invalid booking ID")))
                 .flatMap(booking -> {
-                    long hoursSinceBooking = Duration.between(booking.getBookingDate(), LocalDateTime.now()).toHours();
-                    if (hoursSinceBooking > 24) return Mono.error(new RuntimeException("can't cancel flight after 24 hrs from booking"));
+                    BookingCancelledEvent event = new BookingCancelledEvent();
+                    event.setBookingId(booking.getId());
+                    event.setEmail(booking.getEmail());
+                    event.setPnr(booking.getPnr());
+                    event.setSeatCount(booking.getSeatCount());
+                    event.setReason("Cancelled by user");
+                    bookingEventProducer.sendBookingCancelledEvent(event);
                     return bookingRepo.delete(booking);
                 });
     }

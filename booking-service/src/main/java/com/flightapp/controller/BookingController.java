@@ -37,7 +37,7 @@ public class BookingController {
     }
     
     @PostMapping("/book")
-    @ResponseStatus(HttpStatus.CREATED) // Sets status to 201
+    @ResponseStatus(HttpStatus.CREATED)
     public Mono<Map<String, String>> bookFlight(@RequestBody BookingDTO bookingDTO) {
         return bookingService.bookFlight(toEntity(bookingDTO)).map(booking -> Map.of("id", booking.getId()));
     }
