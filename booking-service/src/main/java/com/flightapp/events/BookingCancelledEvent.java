@@ -13,14 +13,4 @@ public class BookingCancelledEvent {
     private String pnr;
     private int seatCount;
     private String reason;
-    @Override
-    public String toString() {
-        return "BookingCancelledEvent{" +
-                "bookingId='" + bookingId + '\'' +
-                ", email='" + email + '\'' +
-                ", pnr='" + pnr + '\'' +
-                ", seatCount=" + seatCount +
-                ", reason='" + reason + '\'' +
-                '}';
-    }
 }
