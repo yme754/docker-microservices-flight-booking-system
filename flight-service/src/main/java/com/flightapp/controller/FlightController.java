@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.flightapp.dto.FlightRequest;
 import com.flightapp.dto.SearchRequestDTO;
 import com.flightapp.entity.Flight;
 import com.flightapp.service.FlightService;
@@ -42,12 +42,30 @@ public class FlightController {
     }
 
     @PutMapping("/{id}")
-    public Mono<Void> updateFlight(@PathVariable String id, @RequestBody Flight flight) {
+    public Mono<Void> updateFlight(@PathVariable String id, @RequestBody FlightRequest request) {
+        Flight flight = new Flight();
+        flight.setFromPlace(request.getFromPlace());
+        flight.setToPlace(request.getToPlace());
+        flight.setArrivalTime(request.getArrivalTime());
+        flight.setDepartureTime(request.getDepartureTime());
+        flight.setAvailableSeats(request.getAvailableSeats());
+        flight.setPrice(request.getPrice());
+        flight.setAirlineId(request.getAirlineId());
+        flight.setFlightNumber(request.getFlightNumber());
         return flightService.updateFlight(id, flight);
     }
 
     @PostMapping("/add")
-    public Mono<ResponseEntity<Object>> addFlight(@RequestBody Flight flight) {
+    public Mono<ResponseEntity<Object>> addFlight(@RequestBody FlightRequest request) {        
+        Flight flight = new Flight();
+        flight.setFromPlace(request.getFromPlace());
+        flight.setToPlace(request.getToPlace());
+        flight.setArrivalTime(request.getArrivalTime());
+        flight.setDepartureTime(request.getDepartureTime());
+        flight.setAvailableSeats(request.getAvailableSeats());
+        flight.setPrice(request.getPrice());
+        flight.setAirlineId(request.getAirlineId());
+        flight.setFlightNumber(request.getFlightNumber());
         return flightService.addFlight(flight)
             .map(savedFlight -> {
                 Map<String, String> successResponse = Map.of("id", savedFlight.getId());

@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.flightapp.dto.AirlineRequest;
 import com.flightapp.entity.Airline;
 import com.flightapp.service.AirlineService;
 
@@ -39,7 +39,11 @@ public class AirlineController {
     }
 
     @PostMapping("/add")
-    public Mono<ResponseEntity<Object>> addAirline(@RequestBody Airline airline) {
+    public Mono<ResponseEntity<Object>> addAirline(@RequestBody AirlineRequest airlineRequest) {
+        Airline airline = new Airline();
+        airline.setName(airlineRequest.getName());
+        airline.setLogoUrl(airlineRequest.getLogoUrl());
+        airline.setFlightIds(airlineRequest.getFlightIds());
         return airlineService.addAirline(airline)
             .map(savedAirline -> ResponseEntity.status(HttpStatus.CREATED).body((Object)savedAirline))
             .onErrorResume(ResponseStatusException.class, ex -> {

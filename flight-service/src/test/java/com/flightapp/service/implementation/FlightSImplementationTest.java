@@ -2,11 +2,9 @@ package com.flightapp.service.implementation;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +21,6 @@ import com.flightapp.entity.Price;
 import com.flightapp.entity.Seat;
 import com.flightapp.repository.FlightRepository;
 import com.flightapp.repository.SeatRepository;
-import com.mongodb.client.result.UpdateResult;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
