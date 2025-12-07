@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
+import com.flightapp.dto.FlightDTO;
 import com.flightapp.entity.Booking;
 import com.flightapp.events.BookingCancelledEvent;
 import com.flightapp.events.BookingCreatedEvent;
@@ -23,10 +25,12 @@ public class BookingSImplementation implements BookingService {
 
     private final BookingRepository bookingRepo;
     private final BookingEventProducer bookingEventProducer;
+    private final WebClient.Builder webClientBuilder;
 
-    public BookingSImplementation(BookingRepository bookingRepo, BookingEventProducer bookingEventProducer) {
+    public BookingSImplementation(BookingRepository bookingRepo, BookingEventProducer bookingEventProducer, WebClient.Builder webClientBuilder) {
         this.bookingRepo = bookingRepo;
         this.bookingEventProducer = bookingEventProducer;
+		this.webClientBuilder = webClientBuilder;
     }
 
     @Override
@@ -40,18 +44,18 @@ public class BookingSImplementation implements BookingService {
     @Override
     @CircuitBreaker(name = "flightServiceBreaker", fallbackMethod = "bookFlightFallback")
     public Mono<Booking> bookFlight(Booking bookingRequest) {
-        int dummyAvailableSeats = 100;
-        if (bookingRequest.getSeatCount() > dummyAvailableSeats) return Mono.error(new RuntimeException("Not enough seats available"));
-        bookingRequest.setId(UUID.randomUUID().toString());
-        bookingRequest.setPnr("PNR-" + bookingRequest.getId().substring(0, 6).toUpperCase());
-        bookingRequest.setBookingDate(LocalDateTime.now());
-        return bookingRepo.save(bookingRequest)
-                .doOnSuccess(saved ->bookingEventProducer.sendBookingCreatedEvent(
-                                new BookingCreatedEvent(
-                                        saved.getId(),
-                                        saved.getEmail(),
-                                        saved.getPnr(),
-                                        saved.getSeatCount())));
+        return webClientBuilder.build()
+            .put().uri("http://flight-service/api/flight/flights/" + bookingRequest.getFlightId() + "/inventory?add=" + (-bookingRequest.getSeatCount()))
+            .retrieve().bodyToMono(FlightDTO.class)
+            .onErrorResume(e -> Mono.error(new RuntimeException("Flight service failed or Seats unavailable")))
+            .flatMap(flight -> {
+                bookingRequest.setId(UUID.randomUUID().toString());
+                bookingRequest.setPnr("PNR-" + bookingRequest.getId().substring(0, 6).toUpperCase());
+                bookingRequest.setBookingDate(LocalDateTime.now());
+                return bookingRepo.save(bookingRequest);
+            })
+            .doOnSuccess(saved -> bookingEventProducer.sendBookingCreatedEvent(
+                    new BookingCreatedEvent(saved.getId(), saved.getEmail(), saved.getPnr(), saved.getSeatCount())));
     }
 
 
