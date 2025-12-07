@@ -44,10 +44,15 @@ public class BookingSImplementation implements BookingService {
     @Override
     @CircuitBreaker(name = "flightServiceBreaker", fallbackMethod = "bookFlightFallback")
     public Mono<Booking> bookFlight(Booking bookingRequest) {
-        return webClientBuilder.build()
-            .put().uri("http://flight-service/api/flight/flights/" + bookingRequest.getFlightId() + "/inventory?add=" + (-bookingRequest.getSeatCount()))
-            .retrieve().bodyToMono(FlightDTO.class)
-            .onErrorResume(e -> Mono.error(new RuntimeException("Flight service failed or Seats unavailable")))
+            return webClientBuilder.build()
+            .post().uri("http://flight-service/api/flight/seats/" + bookingRequest.getFlightId() + "/book")
+            .bodyValue(bookingRequest.getSeatNumbers()).retrieve()
+            .onStatus(status -> status.value() == 409, response -> 
+                Mono.error(new RuntimeException("Selected seats are already booked!"))
+            )
+            .bodyToMono(Void.class).then(webClientBuilder.build().put()
+                .uri("http://flight-service/api/flight/flights/" + bookingRequest.getFlightId() + "/inventory?add=" + (-bookingRequest.getSeatCount()))
+                .retrieve().bodyToMono(FlightDTO.class))
             .flatMap(flight -> {
                 bookingRequest.setId(UUID.randomUUID().toString());
                 bookingRequest.setPnr("PNR-" + bookingRequest.getId().substring(0, 6).toUpperCase());
@@ -55,15 +60,15 @@ public class BookingSImplementation implements BookingService {
                 return bookingRepo.save(bookingRequest);
             })
             .doOnSuccess(saved -> bookingEventProducer.sendBookingCreatedEvent(
-                    new BookingCreatedEvent(saved.getId(), saved.getEmail(), saved.getPnr(), saved.getSeatCount())));
+                    new BookingCreatedEvent(saved.getId(), saved.getEmail(), saved.getPnr(), saved.getSeatCount())
+            ));
     }
 
 
     @Override
     public Mono<Booking> getBookingByPnr(String pnr) {
         return bookingRepo.findAll()
-                .filter(b -> pnr.equals(b.getPnr()))
-                .singleOrEmpty();
+                .filter(b -> pnr.equals(b.getPnr())).singleOrEmpty();
     }
 
     @Override
