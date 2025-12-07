@@ -28,6 +28,11 @@ public class FlightController {
     public FlightController(FlightService flightService) {
         this.flightService = flightService;
     }
+    
+    @GetMapping
+    public Flux<Flight> getAllFlights() {
+        return flightService.getAllFlights();
+    }
 
     @GetMapping("/{id}")
     public Mono<Flight> getFlightById(@PathVariable String id) {

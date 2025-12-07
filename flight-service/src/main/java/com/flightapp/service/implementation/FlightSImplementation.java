@@ -28,6 +28,11 @@ public class FlightSImplementation implements FlightService{
         this.seatRepo = seatRepo;
         this.mongoTemplate = mongoTemplate;
     }
+    
+    @Override
+    public Flux<Flight> getAllFlights() {
+        return flightRepo.findAll();
+    }
 
     @Override
     public Mono<Flight> getFlightById(String id) {
