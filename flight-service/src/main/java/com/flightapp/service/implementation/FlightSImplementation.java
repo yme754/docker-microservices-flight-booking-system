@@ -6,7 +6,9 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.flightapp.entity.Flight;
 import com.flightapp.entity.Seat;
@@ -47,7 +49,9 @@ public class FlightSImplementation implements FlightService{
     
     @Override
     public Mono<Flight> addFlight(Flight flight) {
-        return flightRepo.save(flight);
+        return flightRepo.findByFlightNumber(flight.getFlightNumber())
+            .flatMap(existingFlight -> Mono.<Flight>error(new ResponseStatusException(HttpStatus.CONFLICT,
+            		"Flight with number " + flight.getFlightNumber() + " already exists"))).switchIfEmpty(flightRepo.save(flight));
     }
 
     @Override

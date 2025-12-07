@@ -3,6 +3,7 @@ package com.flightapp.controller;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.flightapp.dto.SearchRequestDTO;
 import com.flightapp.entity.Flight;
@@ -45,9 +47,16 @@ public class FlightController {
     }
 
     @PostMapping("/add")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Mono<Map<String, String>> addFlight(@RequestBody Flight flight) {
-        return flightService.addFlight(flight).map(savedFlight -> Map.of("id", savedFlight.getId()));
+    public Mono<ResponseEntity<Object>> addFlight(@RequestBody Flight flight) {
+        return flightService.addFlight(flight)
+            .map(savedFlight -> {
+                Map<String, String> successResponse = Map.of("id", savedFlight.getId());
+                return ResponseEntity.status(HttpStatus.CREATED).body((Object)successResponse);
+            })
+            .onErrorResume(ResponseStatusException.class, ex -> {
+                Map<String, String> errorResponse = Map.of("message", ex.getReason());
+                return Mono.just(ResponseEntity.status(ex.getStatusCode()).body(errorResponse));
+            });
     }
 
     @PostMapping("/search")
