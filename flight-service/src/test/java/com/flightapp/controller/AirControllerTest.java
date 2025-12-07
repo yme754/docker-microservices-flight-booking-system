@@ -52,15 +52,30 @@ class AirControllerTest {
     @Test
     void testAddAirline() {
         when(airlineService.addAirline(any())).thenReturn(Mono.just(sample));
-        client.post().uri("/api/flight/airline/add").bodyValue(sample).exchange().expectStatus().isOk().expectBody()
-        .jsonPath("$.name").isEqualTo("Indigo");
+        client.post().uri("/api/flight/airline/add")
+            .bodyValue(sample)
+            .exchange()
+            .expectStatus().isCreated()
+            .expectBody().jsonPath("$.id").exists();
         verify(airlineService).addAirline(any());
     }
 
     @Test
     void testAddFlightToAirline() {
         when(airlineService.addFlightToAirline("A1", "F101")).thenReturn(Mono.just(sample));
-        client.put().uri("/api/flight/airline/A1/add-flight/F101").exchange().expectStatus().isOk();
+        client.put().uri("/api/flight/airline/A1/add/F101").exchange().expectStatus().isOk();
         verify(airlineService).addFlightToAirline("A1", "F101");
+    }
+    
+    @Test
+    void testAddAirline_Duplicate() {
+        when(airlineService.addAirline(any())).thenReturn(Mono.error(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT, "Airline exists")));
+        client.post().uri("/api/flight/airline/add")
+            .bodyValue(sample)
+            .exchange()
+            .expectStatus().isEqualTo(409) 
+            .expectBody()
+            .jsonPath("$.message").isEqualTo("Airline exists"); 
+        verify(airlineService).addAirline(any());
     }
 }

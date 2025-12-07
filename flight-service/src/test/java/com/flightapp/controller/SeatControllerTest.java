@@ -1,5 +1,6 @@
 package com.flightapp.controller;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,5 +45,15 @@ class SeatControllerTest {
         when(seatService.updateSeats("F101", List.of(seat))).thenReturn(Mono.empty());
         client.put().uri("/api/flight/seats/F101/update").bodyValue(List.of(seat)).exchange().expectStatus().isOk();
         verify(seatService).updateSeats("F101", List.of(seat));
+    }
+    
+    @Test
+    void testAddNewSeats() {
+        when(seatService.addSeats(any(), any())).thenReturn(Mono.empty());
+        client.post().uri("/api/flight/seats/F101/add")
+            .bodyValue(List.of(seat))
+            .exchange()
+            .expectStatus().isOk();
+        verify(seatService).addSeats(any(), any());
     }
 }
