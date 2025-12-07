@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.flightapp.dto.SearchRequestDTO;
 import com.flightapp.entity.Flight;
 import com.flightapp.service.FlightService;
 
@@ -44,9 +45,9 @@ public class FlightController {
         return flightService.addFlight(flight).map(savedFlight -> Map.of("id", savedFlight.getId()));
     }
 
-    @GetMapping("/search")
-    public Flux<Flight> searchFlights(@RequestParam String from, @RequestParam String to) {
-        return flightService.searchFlights(from, to);
+    @PostMapping("/search")
+    public Flux<Flight> searchFlights(@RequestBody SearchRequestDTO searchRequest) {
+        return flightService.searchFlights(searchRequest.getFrom(), searchRequest.getTo());
     }
 
     @PutMapping("/{id}/inventory")
