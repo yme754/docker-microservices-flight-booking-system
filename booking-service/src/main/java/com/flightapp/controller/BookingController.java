@@ -29,7 +29,7 @@ public class BookingController {
     public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;
     }
-    // Wishing 
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<Map<String, String>> createBooking(@RequestBody BookingDTO bookingDTO) {
@@ -37,21 +37,19 @@ public class BookingController {
     }
     
     @PostMapping("/book")
-    @ResponseStatus(HttpStatus.CREATED)
     public Mono<Map<String, String>> bookFlight(@RequestBody BookingDTO bookingDTO) {
-        return bookingService.bookFlight(toEntity(bookingDTO)).map(booking -> Map.of("id", booking.getId()));
+        return bookingService.bookFlight(toEntity(bookingDTO))
+        		.map(booking -> Map.of("id", booking.getId(),  "pnr", booking.getPnr()));
     }
 
     @GetMapping("/{pnr}")
     public Mono<BookingDTO> getByPnr(@PathVariable String pnr) {
-        return bookingService.getBookingByPnr(pnr)
-                .map(this::toDto);
+        return bookingService.getBookingByPnr(pnr).map(this::toDto);
     }
 
     @GetMapping
     public Flux<BookingDTO> getAll() {
-        return bookingService.getAllBookings()
-                .map(this::toDto);
+        return bookingService.getAllBookings().map(this::toDto);
     }
 
     @DeleteMapping("/{id}")
