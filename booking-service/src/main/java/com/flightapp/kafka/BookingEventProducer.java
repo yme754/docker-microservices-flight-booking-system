@@ -8,8 +8,8 @@ import com.flightapp.events.BookingCreatedEvent;
 
 @Component
 public class BookingEventProducer {
-	private final KafkaTemplate<String, BookingCreatedEvent> kafkaTemplate;
-    public BookingEventProducer(KafkaTemplate<String, BookingCreatedEvent> kafkaTemplate) {
+	private final KafkaTemplate<String, Object> kafkaTemplate;
+    public BookingEventProducer(KafkaTemplate<String, Object> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
     public void sendBookingCreatedEvent(BookingCreatedEvent event) {
@@ -23,8 +23,14 @@ public class BookingEventProducer {
             });
     }
 
-	public void sendBookingCancelledEvent(BookingCancelledEvent event) {
-		// TODO Auto-generated method stub
-		
-	}
+    public void sendBookingCancelledEvent(BookingCancelledEvent event) {
+        kafkaTemplate.send("booking-cancelled", event.getBookingId(), event)
+            .whenComplete((result, ex) -> {
+                if (ex == null) {
+                    System.out.println("Cancellation event published: " + event.getPnr());
+                } else {
+                    System.err.println("Failed to publish cancellation: " + ex.getMessage());
+                }
+            });
+    }
 }

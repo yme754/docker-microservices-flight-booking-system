@@ -14,13 +14,13 @@ class KafkaProducerConfigTest {
 
     @Test
     void testProducerFactoryBean() {
-        ProducerFactory<String, BookingCreatedEvent> factory = config.producerFactory();
+        ProducerFactory<String, Object> factory = config.producerFactory();
         assertNotNull(factory);
     }
 
     @Test
     void testKafkaTemplateBean() {
-        KafkaTemplate<String, BookingCreatedEvent> template = config.kafkaTemplate();
+        KafkaTemplate<String, Object> template = config.kafkaTemplate();
         assertNotNull(template);
     }
 }
