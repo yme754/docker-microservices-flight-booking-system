@@ -54,27 +54,31 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public Mono<ResponseEntity<?>> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+    public Mono<ResponseEntity<?>> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {        
+        Set<String> strRoles = signUpRequest.getRoles();
+        boolean isAdminRequest = strRoles != null && strRoles.contains("admin");        
+        Mono<Role> roleMono;
+        String finalMessage;
+        if (isAdminRequest) {
+            roleMono = roleRepository.findByName(ERole.ROLE_ADMIN).switchIfEmpty(Mono.error(new RuntimeException("Error: Role ADMIN is not found.")));
+            finalMessage = "Admin registered successfully!";
+        } else {
+            roleMono = roleRepository.findByName(ERole.ROLE_USER).switchIfEmpty(Mono.error(new RuntimeException("Error: Role USER is not found.")));
+            finalMessage = "User registered successfully!";
+        }
         return userRepository.existsByUsername(signUpRequest.getUsername())
             .flatMap(exists -> {
                 if (exists) return Mono.just(ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!")));
                 return userRepository.existsByEmail(signUpRequest.getEmail())
                     .flatMap(emailExists -> {
                         if (emailExists) return Mono.just(ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!")));
-                        User user = new User(signUpRequest.getUsername(), signUpRequest.getEmail(), 
-                        		encoder.encode(signUpRequest.getPassword()));
-                        Set<String> strRoles = signUpRequest.getRoles();
-                        Mono<Role> roleMono;
-                        if (strRoles == null || !strRoles.contains("admin")) 
-                            roleMono = roleRepository.findByName(ERole.ROLE_USER).switchIfEmpty(Mono.error(new RuntimeException("Error: Role USER is not found.")));
-                        else roleMono = roleRepository.findByName(ERole.ROLE_ADMIN).switchIfEmpty(Mono.error(new RuntimeException("Error: Role ADMIN is not found.")));
+                        User user = new User(signUpRequest.getUsername(), signUpRequest.getEmail(), encoder.encode(signUpRequest.getPassword()));
                         return roleMono.flatMap(role -> {
                                 Set<Role> roles = new HashSet<>();
                                 roles.add(role);
                                 user.setRoles(roles);
                                 return userRepository.save(user);
-                            })
-                            .map(savedUser -> ResponseEntity.ok(new MessageResponse("User registered successfully!")));
+                            }).map(savedUser -> ResponseEntity.ok(new MessageResponse(finalMessage)));
                     });
             });
     }
