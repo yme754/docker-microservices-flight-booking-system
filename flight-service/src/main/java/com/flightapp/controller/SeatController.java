@@ -43,7 +43,7 @@ public class SeatController {
     }
     
     @PostMapping("/{flightId}/book")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')") 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')") 
     public Mono<Void> bookSeats(@PathVariable String flightId, @RequestBody List<String> seatNumbers) {
         return seatService.bookSeats(flightId, seatNumbers);
     }

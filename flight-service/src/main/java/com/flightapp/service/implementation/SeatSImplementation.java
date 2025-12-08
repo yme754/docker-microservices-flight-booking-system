@@ -13,7 +13,6 @@ import com.flightapp.service.SeatService;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-// add-seats
 @Service
 @RequiredArgsConstructor
 public class SeatSImplementation implements SeatService{
