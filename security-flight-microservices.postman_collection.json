@@ -1,0 +1,672 @@
+{
+	"info": {
+		"_postman_id": "52cb5a84-5971-4485-95f4-0ed7dd1408f9",
+		"name": "security-flight-microservices",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37303686"
+	},
+	"item": [
+		{
+			"name": "check health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/actuator/health",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"actuator",
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "signup as admin",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"admin_user8\",\n    \"email\": \"admin8@flight.com\",\n    \"password\": \"password123\",\n    \"roles\": [\"admin\"]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9090/api/auth/signup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"auth",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "signup as user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"normal_user3\",\n    \"email\": \"user8@flight.com\",\n    \"password\": \"password123\",\n    \"roles\": [\"user\"]\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9090/api/auth/signup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"auth",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "verify token",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl91c2VyNSIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzY1MTg4MTI3LCJleHAiOjE3NjUyNzQ1Mjd9.Bj-GGfyl019_RlI8wt60SVv_mwM5HbdQhKZkJBuyxCE",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmbGlnaHR1c2VyIiwiaWF0IjoxNzY1MTMxMDg1LCJleHAiOjE3NjUyMTc0ODV9.uCBNg4iBi2zYIcAkZbklX-hcOpHB9QtiJEjXEpSErmo",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "http://localhost:9090/api/flight/flights",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"flight",
+						"flights"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add airline",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl91c2VyNSIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzY1MTk0NjU1LCJleHAiOjE3NjUyODEwNTV9.3W9g1KF_GD9tY4sc-dIrZ4bTaJ5bKkrXDqNPSYrbY3w",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"AXYZ Airlines\",\n    \"logoUrl\": \"https://example.com/logo.png\",\n    \"flightIds\": []\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9090/api/flight/airline/add",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"flight",
+						"airline",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all airlines",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl91c2VyNSIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzY1MTg4MTI3LCJleHAiOjE3NjUyNzQ1Mjd9.Bj-GGfyl019_RlI8wt60SVv_mwM5HbdQhKZkJBuyxCE",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/flight/airline/get",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"flight",
+						"airline",
+						"get"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get airline by ID",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl91c2VyNSIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzY1MTg4MTI3LCJleHAiOjE3NjUyNzQ1Mjd9.Bj-GGfyl019_RlI8wt60SVv_mwM5HbdQhKZkJBuyxCE",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/flight/airline/get/6936c189a87f0ad56a629ac1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"flight",
+						"airline",
+						"get",
+						"6936c189a87f0ad56a629ac1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add flight",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl91c2VyNSIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzY1MTk0NjU1LCJleHAiOjE3NjUyODEwNTV9.3W9g1KF_GD9tY4sc-dIrZ4bTaJ5bKkrXDqNPSYrbY3w",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"fromPlace\": \"HYD\",\n    \"toPlace\": \"DEL\",\n    \"arrivalTime\": \"2025-12-25T14:00:00\",\n    \"departureTime\": \"2025-12-25T10:00:00\",\n    \"availableSeats\": 100,\n    \"price\": {\n        \"oneWay\": 5000,\n        \"roundTrip\": 9000\n    },\n    \"airlineId\": \"6936c189a87f0ad56a629ac1\",\n    \"flightNumber\": \"SH-100\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9090/api/flight/flights/add",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"flight",
+						"flights",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all flights",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl91c2VyNSIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzY1MTg4MTI3LCJleHAiOjE3NjUyNzQ1Mjd9.Bj-GGfyl019_RlI8wt60SVv_mwM5HbdQhKZkJBuyxCE",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/flight/flights",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"flight",
+						"flights"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get flight by ID",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl91c2VyNSIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzY1MTg4MTI3LCJleHAiOjE3NjUyNzQ1Mjd9.Bj-GGfyl019_RlI8wt60SVv_mwM5HbdQhKZkJBuyxCE",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/flight/flights/6936c1b5a87f0ad56a629ac2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"flight",
+						"flights",
+						"6936c1b5a87f0ad56a629ac2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update flights",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl91c2VyNSIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzY1MTk0NjU1LCJleHAiOjE3NjUyODEwNTV9.3W9g1KF_GD9tY4sc-dIrZ4bTaJ5bKkrXDqNPSYrbY3w",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"fromPlace\": \"VJA\",\n    \"toPlace\": \"BLR\",\n    \"arrivalTime\": \"2025-12-25T14:00:00\",\n    \"departureTime\": \"2025-12-25T10:00:00\",\n    \"availableSeats\": 100,\n    \"price\": {\n        \"oneWay\": 5500,\n        \"roundTrip\": 9000\n    },\n    \"airlineId\": \"6935130651cdfc5e6328b8hh\",\n    \"flightNumber\": \"SH-101\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9090/api/flight/flights/6936c1b5a87f0ad56a629ac2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"flight",
+						"flights",
+						"6936c1b5a87f0ad56a629ac2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search flights by src, dest",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl91c2VyNSIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzY1MTg4MTI3LCJleHAiOjE3NjUyNzQ1Mjd9.Bj-GGfyl019_RlI8wt60SVv_mwM5HbdQhKZkJBuyxCE",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"from\": \"VJA\",\n    \"to\": \"BLR\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9090/api/flight/flights/search",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"flight",
+						"flights",
+						"search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get seats",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl91c2VyNSIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzY1MTk0NjU1LCJleHAiOjE3NjUyODEwNTV9.3W9g1KF_GD9tY4sc-dIrZ4bTaJ5bKkrXDqNPSYrbY3w",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/flight/seats/6936c1b5a87f0ad56a629ac2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"flight",
+						"seats",
+						"6936c1b5a87f0ad56a629ac2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add seats",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl91c2VyNSIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzY1MTk0NjU1LCJleHAiOjE3NjUyODEwNTV9.3W9g1KF_GD9tY4sc-dIrZ4bTaJ5bKkrXDqNPSYrbY3w",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n    { \"seatNumber\": \"1A\", \"available\": true },\n    { \"seatNumber\": \"1B\", \"available\": true },\n    { \"seatNumber\": \"1C\", \"available\": true },\n    { \"seatNumber\": \"1D\", \"available\": true },\n    { \"seatNumber\": \"1E\", \"available\": true }\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9090/api/flight/seats/6936c1b5a87f0ad56a629ac2/add",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"flight",
+						"seats",
+						"6936c1b5a87f0ad56a629ac2",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update seats",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl91c2VyNSIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzY1MTk0NjU1LCJleHAiOjE3NjUyODEwNTV9.3W9g1KF_GD9tY4sc-dIrZ4bTaJ5bKkrXDqNPSYrbY3w",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n    {\n        \"seatNumber\": \"1A\",\n        \"available\": false,\n        \"flightId\": \"6936c1b5a87f0ad56a629ac2\"\n    },\n    {\n        \"seatNumber\": \"1C\",\n        \"available\": false,\n        \"flightId\": \"6936c1b5a87f0ad56a629ac2\"\n    }\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9090/api/flight/seats/693546c869b7dc7f561e1f1c/update",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"flight",
+						"seats",
+						"693546c869b7dc7f561e1f1c",
+						"update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "book flight",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl91c2VyNSIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzY1MTg5Nzc2LCJleHAiOjE3NjUyNzYxNzZ9.GtBRXuq0GZBeYRuTjoC-y67AO4P2AtDqOS4PL423Qxo",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"yaswithasakhamuri05@gmail.com\",\n    \"flightId\": \"6936c1b5a87f0ad56a629ac2\",\n    \"seatCount\": 1,\n    \"passengerIds\": [\"P6\"],\n    \"seatNumbers\": [\"1E\"]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9090/api/flight/bookings/book",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"flight",
+						"bookings",
+						"book"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all bookings",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl91c2VyNSIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzY1MTk0NjU1LCJleHAiOjE3NjUyODEwNTV9.3W9g1KF_GD9tY4sc-dIrZ4bTaJ5bKkrXDqNPSYrbY3w",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/flight/bookings",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"flight",
+						"bookings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get booking by PNR",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl91c2VyNSIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzY1MTk0NjU1LCJleHAiOjE3NjUyODEwNTV9.3W9g1KF_GD9tY4sc-dIrZ4bTaJ5bKkrXDqNPSYrbY3w",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/flight/bookings/PNR-14D4C7",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"flight",
+						"bookings",
+						"PNR-14D4C7"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "del booking",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl91c2VyNSIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzY1MTg5Nzc2LCJleHAiOjE3NjUyNzYxNzZ9.GtBRXuq0GZBeYRuTjoC-y67AO4P2AtDqOS4PL423Qxo",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/api/flight/bookings/33aae32f-2a9c-408c-b923-fc135aca0cf1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"flight",
+						"bookings",
+						"33aae32f-2a9c-408c-b923-fc135aca0cf1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
