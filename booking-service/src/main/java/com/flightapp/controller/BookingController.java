@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,8 +41,9 @@ public class BookingController {
     }
     
     @PostMapping("/book")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public Mono<ResponseEntity<Map<String, String>>> bookFlight(@RequestBody BookingDTO bookingDTO) {
-    	logger.info("SonarCloud Analysis Triggered");
+    	logger.info("SonarCloud Analysis");
     	return bookingService.bookFlight(toEntity(bookingDTO)).map(booking -> {
                     Map<String, String> response = Map.of("id", booking.getId(),"pnr", booking.getPnr());
                     return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -49,16 +51,19 @@ public class BookingController {
     }
 
     @GetMapping("/{pnr}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public Mono<BookingDTO> getByPnr(@PathVariable String pnr) {
         return bookingService.getBookingByPnr(pnr).map(this::toDto);
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public Flux<BookingDTO> getAll() {
         return bookingService.getAllBookings().map(this::toDto);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public Mono<ResponseEntity<String>> delete(@PathVariable String id) {
         return bookingService.deleteBooking(id)
                 .then(Mono.just(ResponseEntity.ok("Booking deleted successfully!")))
