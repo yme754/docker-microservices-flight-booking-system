@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,16 +33,19 @@ public class FlightController {
     }
     
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public Flux<Flight> getAllFlights() {
         return flightService.getAllFlights();
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public Mono<Flight> getFlightById(@PathVariable String id) {
         return flightService.getFlightById(id);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public Mono<Void> updateFlight(@PathVariable String id, @RequestBody FlightRequest request) {
         Flight flight = new Flight();
         flight.setFromPlace(request.getFromPlace());
@@ -56,6 +60,7 @@ public class FlightController {
     }
 
     @PostMapping("/add")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public Mono<ResponseEntity<Object>> addFlight(@RequestBody FlightRequest request) {        
         Flight flight = new Flight();
         flight.setFromPlace(request.getFromPlace());
@@ -78,12 +83,15 @@ public class FlightController {
     }
 
     @PostMapping("/search")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public Flux<Flight> searchFlights(@RequestBody SearchRequestDTO searchRequest) {
         return flightService.searchFlights(searchRequest.getFrom(), searchRequest.getTo());
     }
 
     @PutMapping("/{id}/inventory")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')") 
     public Mono<Flight> addInventory(@PathVariable String id, @RequestParam int add) {
         return flightService.increaseAvailableSeats(id, add);
     }
+    
 }
