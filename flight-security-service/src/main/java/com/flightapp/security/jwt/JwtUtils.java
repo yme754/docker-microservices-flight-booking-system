@@ -30,11 +30,17 @@ public class JwtUtils {
 	  @Value("${flightapp.app.jwtExpirationMs}")
 	  private int jwtExpirationMs;
 	  public String generateJwtToken(Authentication authentication) {
-		    UserImplementation userPrincipal = (UserImplementation) authentication.getPrincipal();
+		  UserImplementation userPrincipal = (UserImplementation) authentication.getPrincipal();
+		    java.util.List<String> roles = userPrincipal.getAuthorities().stream()
+		            .map(item -> item.getAuthority())
+		            .collect(java.util.stream.Collectors.toList());
 		    return Jwts.builder()
-		        .setSubject((userPrincipal.getUsername())).setIssuedAt(new Date())
+		        .setSubject((userPrincipal.getUsername()))
+		        .claim("roles", roles)
+		        .setIssuedAt(new Date())
 		        .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
-		        .signWith(key(), SignatureAlgorithm.HS256).compact();
+		        .signWith(key(), SignatureAlgorithm.HS256)
+		        .compact();
 		  }
 
 	  private Key key() {
@@ -60,4 +66,6 @@ public class JwtUtils {
 	    }
 	    return false;
 	  }
+	  
+	  
 }

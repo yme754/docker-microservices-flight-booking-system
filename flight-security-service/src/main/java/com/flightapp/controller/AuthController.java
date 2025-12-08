@@ -61,15 +61,19 @@ public class AuthController {
                 return userRepository.existsByEmail(signUpRequest.getEmail())
                     .flatMap(emailExists -> {
                         if (emailExists) return Mono.just(ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!")));
-                        User user = new User(signUpRequest.getUsername(),signUpRequest.getEmail(),encoder.encode(signUpRequest.getPassword()));
-                        return roleRepository.findByName(ERole.ROLE_USER)
-                            .flatMap(userRole -> {
+                        User user = new User(signUpRequest.getUsername(), signUpRequest.getEmail(), 
+                        		encoder.encode(signUpRequest.getPassword()));
+                        Set<String> strRoles = signUpRequest.getRoles();
+                        Mono<Role> roleMono;
+                        if (strRoles == null || !strRoles.contains("admin")) 
+                            roleMono = roleRepository.findByName(ERole.ROLE_USER).switchIfEmpty(Mono.error(new RuntimeException("Error: Role USER is not found.")));
+                        else roleMono = roleRepository.findByName(ERole.ROLE_ADMIN).switchIfEmpty(Mono.error(new RuntimeException("Error: Role ADMIN is not found.")));
+                        return roleMono.flatMap(role -> {
                                 Set<Role> roles = new HashSet<>();
-                                roles.add(userRole);
+                                roles.add(role);
                                 user.setRoles(roles);
                                 return userRepository.save(user);
                             })
-                            .switchIfEmpty(userRepository.save(user)) 
                             .map(savedUser -> ResponseEntity.ok(new MessageResponse("User registered successfully!")));
                     });
             });
