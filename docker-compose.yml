@@ -1,0 +1,117 @@
+version: '3.8'
+
+services:
+  flight-mongodb:
+    image: mongo:5.0
+    container_name: flight-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+
+  flight-config-server:
+    build: ./flight-config-server
+    container_name: flight-config-server
+    ports:
+      - "8888:8888"
+    depends_on:
+      - flight-mongodb
+    environment:
+      - SPRING_PROFILES_ACTIVE=native
+      - SERVER_PORT=8888
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
+    restart: always
+
+  flight-service-registery:
+    build: ./flight-service-registery
+    container_name: flight-service-registry
+    ports:
+      - "8761:8761"
+    depends_on:
+      - flight-config-server
+    environment:
+      - SERVER_PORT=8761
+      - CONFIG_SERVER_URL=http://flight-config-server:8888/
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
+    restart: always
+
+  flight-security-service:
+    build: ./flight-security-service
+    container_name: flight-security-service
+    ports:
+      - "9091:9091"
+    depends_on:
+      - flight-service-registery
+      - flight-mongodb
+    environment:
+      - SERVER_PORT=9091
+      - CONFIG_SERVER_URL=http://flight-config-server:8888/
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://flight-service-registry:8761/eureka/
+      - FLIGHTAPP_APP_JWTSECRET=ThisIsASecretKeyForFlightAppThatMustBeVeryLongToSatisfyTheHS512AlgorithmRequirementsAndBeSecureEnoughForProductionUse1234567890
+      - SPRING_DATA_MONGODB_URI=mongodb://flight-mongodb:27017/flight_security_db
+      - JAVA_TOOL_OPTIONS=-Dspring.data.mongodb.uri=mongodb://flight-mongodb:27017/flight_security_db
+      - SPRING_APPLICATION_JSON={"spring.data.mongodb.uri":"mongodb://flight-mongodb:27017/flight_security_db"}
+    restart: always
+
+  flight-service:
+    build: ./flight-service
+    container_name: flight-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - flight-service-registery
+      - flight-mongodb
+    environment:
+      - SERVER_PORT=8082
+      - CONFIG_SERVER_URL=http://flight-config-server:8888/
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://flight-service-registry:8761/eureka/
+      - SPRING_DATA_MONGODB_URI=mongodb://flight-mongodb:27017/flight_db
+      - JAVA_TOOL_OPTIONS=-Dspring.data.mongodb.uri=mongodb://flight-mongodb:27017/flight_db
+      - SPRING_APPLICATION_JSON={"spring.data.mongodb.uri":"mongodb://flight-mongodb:27017/flight_db"}
+    restart: always
+
+  booking-service:
+    build: ./booking-service
+    container_name: booking-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - flight-service-registery
+      - flight-mongodb
+      - flight-service
+    environment:
+      - SERVER_PORT=8083
+      - CONFIG_SERVER_URL=http://flight-config-server:8888/
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://flight-service-registry:8761/eureka/
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=flight-mongodb:9092
+      - SPRING_DATA_MONGODB_URI=mongodb://flight-mongodb:27017/booking_db
+      - JAVA_TOOL_OPTIONS=-Dspring.data.mongodb.uri=mongodb://flight-mongodb:27017/booking_db
+      - SPRING_APPLICATION_JSON={"spring.data.mongodb.uri":"mongodb://flight-mongodb:27017/booking_db"}
+    restart: always
+
+  flight-api-gateway:
+    build: ./flight-api-gateway
+    container_name: flight-api-gateway
+    ports:
+      - "9090:9090"
+    depends_on:
+      - flight-service-registery
+      - flight-security-service
+      - flight-service
+      - booking-service
+    environment:
+      - SERVER_PORT=9090
+      - CONFIG_SERVER_URL=http://flight-config-server:8888/
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://flight-service-registry:8761/eureka/
+      - FLIGHTAPP_APP_JWTSECRET=ThisIsASecretKeyForFlightAppThatMustBeVeryLongToSatisfyTheHS512AlgorithmRequirementsAndBeSecureEnoughForProductionUse1234567890
+    restart: always
+
+volumes:
+  mongo_data:
