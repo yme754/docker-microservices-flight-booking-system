@@ -1,5 +1,7 @@
 package com.flightapp.gateway.filter;
 
+import java.util.List;
+
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
@@ -27,15 +29,15 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     public GatewayFilter apply(Config config) {
         return ((exchange, chain) -> {
             if (validator.isSecured.test(exchange.getRequest())) {                
-                if (!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
+                if (!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) 
                     return onError(exchange, "Missing Authorization Header", HttpStatus.UNAUTHORIZED);
-                }
                 String authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
-                if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                    authHeader = authHeader.substring(7);
-                }
+                if (authHeader != null && authHeader.startsWith("Bearer ")) authHeader = authHeader.substring(7);
                 try {
-                    jwtUtils.validateToken(authHeader);
+                	jwtUtils.validateToken(authHeader);
+                    List<String> roles = jwtUtils.getRolesFromToken(authHeader);
+                    String rolesString = String.join(",", roles);
+                    exchange.getRequest().mutate().header("X-Auth-Roles", rolesString).build();
                 } catch (Exception e) {
                     System.err.println("Invalid Token: " + e.getMessage());
                     return onError(exchange, "Unauthorized access to application", HttpStatus.UNAUTHORIZED);
