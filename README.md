@@ -205,4 +205,6 @@ Implemented in the **Booking Service** to protect against Flight Service failure
 
 ## 4. Architecture Diagram
 
-<img width="918" height="449" alt="Dockerised Architecture Diagram" src="https://github.com/user-attachments/assets/e8163c40-e599-46ea-9ed6-1f54ad54e80c" />
+<div align="center">
+  <img width="703" height="489" alt="Architecture Diagram(dockerised)" src="https://github.com/user-attachments/assets/2389a8c4-d541-451e-886c-f1e99d65a7e5" />
+</div>
