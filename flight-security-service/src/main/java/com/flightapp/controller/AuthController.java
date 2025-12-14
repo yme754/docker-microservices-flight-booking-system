@@ -24,7 +24,6 @@ import com.flightapp.repository.RoleRepository;
 import com.flightapp.repository.UserRepository;
 import com.flightapp.security.jwt.JwtUtils;
 import com.flightapp.security.service.UserImplementation;
-import com.flightapp.security.service.UserServiceImplementation;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -52,11 +51,12 @@ public class AuthController {
                 return ResponseEntity.ok(new JwtResponse(jwt,userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
             });
     }
-
     @PostMapping("/signup")
     public Mono<ResponseEntity<?>> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {        
         Set<String> strRoles = signUpRequest.getRoles();
-        boolean isAdminRequest = strRoles != null && strRoles.contains("admin");        
+        boolean isAdminRequest = strRoles != null &&
+                strRoles.stream().anyMatch(r ->
+                    r.equalsIgnoreCase("admin") || r.equalsIgnoreCase("ROLE_ADMIN"));        
         Mono<Role> roleMono;
         String finalMessage;
         if (isAdminRequest) {

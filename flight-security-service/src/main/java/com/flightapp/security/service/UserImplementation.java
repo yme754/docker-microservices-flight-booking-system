@@ -12,8 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.flightapp.entity.User;
 
-import lombok.Data;
-
 
 public class UserImplementation implements UserDetails{
 	private static final long serialVersionUID = 1L;
