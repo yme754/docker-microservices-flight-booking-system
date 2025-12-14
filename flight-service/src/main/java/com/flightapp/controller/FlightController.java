@@ -39,7 +39,7 @@ public class FlightController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER', 'ROLE_INTERNAL')")
     public Mono<Flight> getFlightById(@PathVariable String id) {
         return flightService.getFlightById(id);
     }
@@ -89,7 +89,7 @@ public class FlightController {
     }
 
     @PutMapping("/{id}/inventory")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')") 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER', 'ROLE_INTERNAL')") 
     public Mono<Flight> addInventory(@PathVariable String id, @RequestParam int add) {
         return flightService.increaseAvailableSeats(id, add);
     }

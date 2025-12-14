@@ -22,28 +22,28 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/flight/seats")
 @RequiredArgsConstructor
 public class SeatController {
-	private final SeatService seatService;
+    private final SeatService seatService;
 
-	@GetMapping("/{flightId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')") 
+    @GetMapping("/{flightId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public Flux<Seat> getSeatsByFlightId(@PathVariable String flightId) {
         return seatService.getSeatsByFlightId(flightId);
     }
-	
-	@PostMapping("/{flightId}/add")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')") 
+    
+    @PostMapping("/{flightId}/add")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public Mono<Void> addNewSeats(@PathVariable String flightId, @RequestBody List<Seat> seats) {
         return seatService.addSeats(flightId, seats);
     }
 
     @PutMapping("/{flightId}/update")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')") 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public Mono<Void> updateSeats( @PathVariable String flightId, @RequestBody List<Seat> seats) {
         return seatService.updateSeats(flightId, seats);
     }
     
     @PostMapping("/{flightId}/book")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')") 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER', 'ROLE_INTERNAL')") 
     public Mono<Void> bookSeats(@PathVariable String flightId, @RequestBody List<String> seatNumbers) {
         return seatService.bookSeats(flightId, seatNumbers);
     }

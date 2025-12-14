@@ -30,8 +30,7 @@ public class SeatSImplementation implements SeatService{
                 newSeat.setFlightId(flightId);            
                 return seatRepo.findByFlightIdAndSeatNumber(flightId, newSeat.getSeatNumber())
                     .flatMap(existing -> Mono.empty()).switchIfEmpty(seatRepo.save(newSeat)); 
-            })
-            .then();
+            }).then();
     }
 
     @Override
@@ -39,10 +38,8 @@ public class SeatSImplementation implements SeatService{
         return seatRepo.findByFlightId(flightId)
                 .flatMap(seatRepo::delete)
                 .thenMany(Flux.fromIterable(seats))
-                .flatMap(seatRepo::save)
-                .then();
+                .flatMap(seatRepo::save).then();
     }
-
     @Override
     public Mono<Void> bookSeats(String flightId, List<String> seatNumbers) {
         return seatRepo.findByFlightIdAndSeatNumberIn(flightId, seatNumbers)

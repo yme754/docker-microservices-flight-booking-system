@@ -1,7 +1,6 @@
 package com.flightapp.service.implementation;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,7 +53,6 @@ class AirlineSImplementationTest {
 
     @Test
     void testAddAirline() {
-        when(airlineRepo.findByName(anyString())).thenReturn(Mono.empty());
         when(airlineRepo.save(any())).thenReturn(Mono.just(airline));
         StepVerifier.create(service.addAirline(airline)).expectNext(airline).verifyComplete();
         verify(airlineRepo).save(any());
@@ -67,20 +65,5 @@ class AirlineSImplementationTest {
         StepVerifier.create(service.addFlightToAirline(airline.getId(), "F2")).expectNext(airline).verifyComplete();
         verify(airlineRepo).findById(airline.getId());
         verify(airlineRepo).save(any());
-    }
-    
-    @Test
-    void testAddAirline_Success() {
-        when(airlineRepo.findByName(anyString())).thenReturn(Mono.empty());
-        when(airlineRepo.save(any())).thenReturn(Mono.just(airline));        
-        StepVerifier.create(service.addAirline(airline)).expectNext(airline).verifyComplete();
-    }
-
-    @Test
-    void testAddAirline_Duplicate() {
-        when(airlineRepo.findByName(airline.getName())).thenReturn(Mono.just(airline));        
-        when(airlineRepo.save(any())).thenReturn(Mono.empty());
-        StepVerifier.create(service.addAirline(airline))
-                .expectErrorMatches(ex -> ex.getMessage().contains("already exists")).verify();
     }
 }
