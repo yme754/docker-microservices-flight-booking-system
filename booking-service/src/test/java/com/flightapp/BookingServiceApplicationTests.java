@@ -11,7 +11,7 @@ class BookingServiceApplicationTests {
 	@Test
 	@Disabled("not needed")
 	void contextLoads() {
-		// disabled for to skip the test
+		// disabled to skip the test
 	}
 
 }
