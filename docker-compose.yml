@@ -1,117 +1,171 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  flight-mongodb:
-    image: mongo:5.0
-    container_name: flight-mongodb
+  flight-service-registery:
+    build: ./flight-service-registery
+    container_name: flight-service-registery
     ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    restart: always
+      - "8761:8761"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8761
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+      EUREKA_CLIENT_FETCH_REGISTRY: "false"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   flight-config-server:
     build: ./flight-config-server
     container_name: flight-config-server
     ports:
       - "8888:8888"
-    depends_on:
-      - flight-mongodb
     environment:
-      - SPRING_PROFILES_ACTIVE=native
-      - SERVER_PORT=8888
-      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
-      - EUREKA_CLIENT_FETCH_REGISTRY=false
-    restart: always
-
-  flight-service-registery:
-    build: ./flight-service-registery
-    container_name: flight-service-registry
-    ports:
-      - "8761:8761"
+      SPRING_PROFILES_ACTIVE: native
+      SERVER_PORT: 8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://flight-service-registery:8761/eureka/
     depends_on:
-      - flight-config-server
-    environment:
-      - SERVER_PORT=8761
-      - CONFIG_SERVER_URL=http://flight-config-server:8888/
-      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
-      - EUREKA_CLIENT_FETCH_REGISTRY=false
-    restart: always
-
-  flight-security-service:
-    build: ./flight-security-service
-    container_name: flight-security-service
-    ports:
-      - "9091:9091"
-    depends_on:
-      - flight-service-registery
-      - flight-mongodb
-    environment:
-      - SERVER_PORT=9091
-      - CONFIG_SERVER_URL=http://flight-config-server:8888/
-      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://flight-service-registry:8761/eureka/
-      - FLIGHTAPP_APP_JWTSECRET=ThisIsASecretKeyForFlightAppThatMustBeVeryLongToSatisfyTheHS512AlgorithmRequirementsAndBeSecureEnoughForProductionUse1234567890
-      - SPRING_DATA_MONGODB_URI=mongodb://flight-mongodb:27017/flight_security_db
-      - JAVA_TOOL_OPTIONS=-Dspring.data.mongodb.uri=mongodb://flight-mongodb:27017/flight_security_db
-      - SPRING_APPLICATION_JSON={"spring.data.mongodb.uri":"mongodb://flight-mongodb:27017/flight_security_db"}
-    restart: always
-
-  flight-service:
-    build: ./flight-service
-    container_name: flight-service
-    ports:
-      - "8082:8082"
-    depends_on:
-      - flight-service-registery
-      - flight-mongodb
-    environment:
-      - SERVER_PORT=8082
-      - CONFIG_SERVER_URL=http://flight-config-server:8888/
-      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://flight-service-registry:8761/eureka/
-      - SPRING_DATA_MONGODB_URI=mongodb://flight-mongodb:27017/flight_db
-      - JAVA_TOOL_OPTIONS=-Dspring.data.mongodb.uri=mongodb://flight-mongodb:27017/flight_db
-      - SPRING_APPLICATION_JSON={"spring.data.mongodb.uri":"mongodb://flight-mongodb:27017/flight_db"}
-    restart: always
-
-  booking-service:
-    build: ./booking-service
-    container_name: booking-service
-    ports:
-      - "8083:8083"
-    depends_on:
-      - flight-service-registery
-      - flight-mongodb
-      - flight-service
-    environment:
-      - SERVER_PORT=8083
-      - CONFIG_SERVER_URL=http://flight-config-server:8888/
-      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://flight-service-registry:8761/eureka/
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=flight-mongodb:9092
-      - SPRING_DATA_MONGODB_URI=mongodb://flight-mongodb:27017/booking_db
-      - JAVA_TOOL_OPTIONS=-Dspring.data.mongodb.uri=mongodb://flight-mongodb:27017/booking_db
-      - SPRING_APPLICATION_JSON={"spring.data.mongodb.uri":"mongodb://flight-mongodb:27017/booking_db"}
-    restart: always
+      flight-service-registery:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   flight-api-gateway:
     build: ./flight-api-gateway
     container_name: flight-api-gateway
     ports:
       - "9090:9090"
-    depends_on:
-      - flight-service-registery
-      - flight-security-service
-      - flight-service
-      - booking-service
     environment:
-      - SERVER_PORT=9090
-      - CONFIG_SERVER_URL=http://flight-config-server:8888/
-      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://flight-service-registry:8761/eureka/
-      - FLIGHTAPP_APP_JWTSECRET=ThisIsASecretKeyForFlightAppThatMustBeVeryLongToSatisfyTheHS512AlgorithmRequirementsAndBeSecureEnoughForProductionUse1234567890
-    restart: always
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 9090
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://flight-service-registery:8761/eureka/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://flight-config-server:8888
+      FLIGHTAPP_APP_JWTSECRET: ivS4s3zAQVAN6KYOQYYFL9OaBTxUhFDCB4uk2TCASF7adHoDwDzB/fsZ2F0hxK9Ys50jePp34F/oUNsWTqOIWQ=
+    depends_on:
+      flight-service-registery:
+        condition: service_healthy
+      flight-config-server:
+        condition: service_healthy
+
+  flight-security-service:
+    build: ./flight-security-service
+    container_name: flight-security-service
+    ports:
+      - "9091:9091"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 9091
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/flight_security_db
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://flight-service-registery:8761/eureka/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://flight-config-server:8888
+      FLIGHTAPP_APP_JWTSECRET: ivS4s3zAQVAN6KYOQYYFL9OaBTxUhFDCB4uk2TCASF7adHoDwDzB/fsZ2F0hxK9Ys50jePp34F/oUNsWTqOIWQ=
+    depends_on:
+      mongo:
+        condition: service_started
+      flight-service-registery:
+        condition: service_healthy
+      flight-config-server:
+        condition: service_healthy
+
+  flight-service:
+    build: ./flight-service
+    container_name: flight-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8082
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/flightdb
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://flight-service-registery:8761/eureka/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://flight-config-server:8888
+      FLIGHTAPP_INTERNAL_JWT: INTERNAL_SERVICE_TOKEN
+    depends_on:
+      mongo:
+        condition: service_started
+      flight-service-registery:
+        condition: service_healthy
+      flight-config-server:
+        condition: service_healthy
+
+  booking-service:
+    build: ./booking-service
+    container_name: booking-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8083
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/bookingdb
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://flight-service-registery:8761/eureka/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://flight-config-server:8888
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      mongo:
+        condition: service_started
+      kafka:
+        condition: service_started
+      flight-service-registery:
+        condition: service_healthy
+      flight-config-server:
+        condition: service_healthy
+
+  flight-email-service:
+    build: ./flight-email-service
+    container_name: flight-email-service
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8084
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://flight-service-registery:8761/eureka/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://flight-config-server:8888
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_MAIL_ENABLED: "false"
+    depends_on:
+      kafka:
+        condition: service_started
+      flight-service-registery:
+        condition: service_healthy
+      flight-config-server:
+        condition: service_healthy
+
+  mongo:
+    image: mongo:5.0
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
 volumes:
   mongo_data:
